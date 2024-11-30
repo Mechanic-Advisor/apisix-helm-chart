@@ -18,8 +18,7 @@ permissions:
 jobs:
   build:
     name: Docker build
-    runs-on:
-      group: steer-ecr
+    runs-on: ubuntu-latest
 
     defaults:
       run:
@@ -30,7 +29,10 @@ jobs:
 
       - name: ECR login
         run: |
-          aws ecr --profile maroot get-login-password | helm registry login --username AWS --password-stdin 447542674857.dkr.ecr.us-east-2.amazonaws.com
+          export AWS_ACCESS_KEY_ID=AKIAWQM47IWUSWHIO4FX
+          export AWS_SECRET_ACCESS_KEY=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
+          export AWS_REGION=us-east-2
+          aws ecr get-login-password | helm registry login --username AWS --password-stdin 447542674857.dkr.ecr.us-east-2.amazonaws.com
 
       - name: Publish charts
         run: |
