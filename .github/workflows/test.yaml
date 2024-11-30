@@ -1,0 +1,41 @@
+
+name: Release Helm chart
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        type: boolean
+        description: Whether to build de image
+        default: true
+      deploy:
+        type: boolean
+        description: Whether to deploy to the selected environment
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Docker build
+    runs-on:
+      group: steer-ecr
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ECR login
+        run: |
+          aws ecr --profile maroot get-login-password | helm registry login --username AWS --password-stdin 447542674857.dkr.ecr.us-east-2.amazonaws.com
+
+      - name: Publish charts
+        run: |
+          helm package charts/apisix
+          helm package charts/apisix-ingress-controller
+
+          helm push apisix-2.9.0.tgz oci://447542674857.dkr.ecr.us-east-2.amazonaws.com/
+          helm push apisix-ingress-controller-0.14.0.tgz oci://447542674857.dkr.ecr.us-east-2.amazonaws.com/
